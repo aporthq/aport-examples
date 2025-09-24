@@ -79,3 +79,6 @@ If you have a useful example, please contribute it! See [CONTRIBUTING.md](../CON
 - **GitHub Issues**: [Report issues](github.com/aporthq/agent-passport/issues)
 - **GitHub Discussions**: [Ask questions](github.com/aporthq/agent-passport/discussions)
 - **Documentation**: [Full documentation](../docs/)
+
+---
+**Last Updated**: 2025-09-24 23:02:26 UTC
