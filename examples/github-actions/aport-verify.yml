@@ -1,0 +1,82 @@
+# .github/workflows/aport-verify.yml
+name: APort Verify
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, ready_for_review]
+  push:
+    branches: [main, develop]
+
+jobs:
+  aport-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute diff stats
+        id: diff
+        run: |
+          BASE="${{ github.event.pull_request.base.sha || github.event.before }}"
+          HEAD="${{ github.event.pull_request.head.sha || github.sha }}"
+          FILES=$(git diff --name-only "$BASE" "$HEAD" | wc -l)
+          LINES=$(git diff --shortstat "$BASE" "$HEAD" | awk '{print $4}' || echo "0")
+          echo "files=${FILES:-0}" >> $GITHUB_OUTPUT
+          echo "lines=${LINES:-0}" >> $GITHUB_OUTPUT
+
+      - name: Get PR labels
+        id: labels
+        if: github.event_name == 'pull_request'
+        run: |
+          LABELS=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | jq -R -s -c 'split("\n")[:-1]')
+          echo "labels=${LABELS:-[]}" >> $GITHUB_OUTPUT
+
+      - name: APort policy check (repo.merge.v1)
+        env:
+          APORT_API_BASE: https://api.aport.io
+          APORT_AGENT_ID: ${{ secrets.APORT_AGENT_ID }} # who is acting
+        run: |
+          # Build context object for APort policy verification
+          BODY=$(jq -n \
+            --arg id "$APORT_AGENT_ID" \
+            --arg repo "${{ github.repository }}" \
+            --arg branch "${{ github.ref_name }}" \
+            --arg actor "${{ github.actor }}" \
+            --arg app "${{ github.event.app.name || '' }}" \
+            --argjson files ${{ steps.diff.outputs.files }} \
+            --argjson lines ${{ steps.diff.outputs.lines }} \
+            --argjson labels "${{ steps.labels.outputs.labels || '[]' }}" \
+            --argjson reviews 0 \
+            --argjson pr_size_kb $(( (${{ steps.diff.outputs.lines }} * 50) / 1024 )) \
+            '{agent_id:$id, context:{repo:$repo, base_branch:$branch, github_actor:$actor, github_app:$app, files_changed:$files, lines_added:$lines, labels:$labels, reviews:$reviews, pr_size_kb:$pr_size_kb}}')
+
+          echo "Policy verification request:"
+          echo "$BODY" | jq '.'
+
+          # Call APort policy verification API
+          RESPONSE=$(curl -fsS -X POST "$APORT_API_BASE/verify/policy/repo.v1" \
+               -H "Content-Type: application/json" \
+               -d "$BODY" \
+               -w "\n%{http_code}")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY_RESPONSE=$(echo "$RESPONSE" | head -n -1)
+
+          echo "Policy verification response (HTTP $HTTP_CODE):"
+          echo "$BODY_RESPONSE" | jq '.'
+
+          # Check if policy verification passed
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ APort policy verification failed (HTTP $HTTP_CODE)"
+            echo "$BODY_RESPONSE" | jq -r '.violations[]?' || echo "Unknown error"
+            exit 1
+          fi
+
+          # Parse response to check if allowed
+          ALLOWED=$(echo "$BODY_RESPONSE" | jq -r '.allow // false')
+          if [ "$ALLOWED" != "true" ]; then
+            echo "❌ APort policy verification denied"
+            echo "$BODY_RESPONSE" | jq -r '.violations[]?' || echo "Policy violation"
+            exit 1
+          fi
+
+          echo "✅ APort policy verification passed"
+          echo "$BODY_RESPONSE" | jq -r '.reason // "Policy compliance verified"'
