@@ -28,7 +28,7 @@ This directory contains practical examples and tutorials for using the AI Agent 
 
 ### Verify an Agent Passport
 ```bash
-curl "https://api.aport.io/api/verify/aeebc92d-13fb-4e23-8c3c-1aa82b167da6"
+curl "https://api.aport.io/api/verify/ap_128094d3"
 ```
 
 ### Create a New Passport

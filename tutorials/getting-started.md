@@ -63,7 +63,7 @@ Try verifying different agent IDs:
 
 ```bash
 # Another demo agent
-curl "https://api.aport.io/api/verify/aeebc92d-13fb-4e23-8c3c-1aa82b167da6"
+curl "https://api.aport.io/api/verify/ap_128094d3"
 
 # Non-existent agent (will return 404)
 curl "https://api.aport.io/api/verify/ap_nonexistent"
