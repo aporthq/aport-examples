@@ -57,7 +57,7 @@ echo -e "\n${YELLOW}1. Verifying existing passports${NC}"
 echo "================================"
 
 make_request "GET" "/api/verify/ap_demo_001"
-make_request "GET" "/api/verify/aeebc92d-13fb-4e23-8c3c-1aa82b167da6"
+make_request "GET" "/api/verify/ap_128094d3"
 
 # 2. Create a new passport
 echo -e "\n${YELLOW}2. Creating a new passport${NC}"

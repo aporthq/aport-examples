@@ -483,7 +483,7 @@ async function main() {
 
   // Verify existing passports
   await verifyPassport("ap_demo_001");
-  await verifyPassport("aeebc92d-13fb-4e23-8c3c-1aa82b167da6");
+  await verifyPassport("ap_128094d3");
 
   // Demonstrate capabilities and limits enforcement
   await demonstrateCapabilitiesAndLimits("ap_demo_001");

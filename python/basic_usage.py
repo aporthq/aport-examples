@@ -360,7 +360,7 @@ def main():
     
     # Verify existing passports
     client.verify_passport('ap_demo_001')
-    client.verify_passport('aeebc92d-13fb-4e23-8c3c-1aa82b167da6')
+    client.verify_passport('ap_128094d3')
 
     # Demonstrate capabilities and limits enforcement
     client.demonstrate_capabilities_and_limits('ap_demo_001')
