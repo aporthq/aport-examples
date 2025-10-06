@@ -1,6 +1,6 @@
 # Getting Started Tutorial
 
-This tutorial will walk you through your first interactions with the AI Agent Passport Registry API.
+This tutorial will walk you through your first interactions with The Passport for AI Agents API.
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ This tutorial will walk you through your first interactions with the AI Agent Pa
 
 ## Step 1: Understanding the API
 
-The AI Agent Passport Registry provides a RESTful API for managing AI agent identities. The main concepts are:
+The Passport for AI Agents provides a RESTful API for managing AI agent identities. The main concepts are:
 
 - **Agent Passport**: A digital identity document for an AI agent
 - **Verification**: Checking if an agent passport is valid and active
@@ -63,7 +63,7 @@ Try verifying different agent IDs:
 
 ```bash
 # Another demo agent
-curl "https://api.aport.io/api/verify/ap_128094d3"
+curl "https://api.aport.io/api/verify/ap_a2d10232c6534523812423eec8a1425c"
 
 # Non-existent agent (will return 404)
 curl "https://api.aport.io/api/verify/ap_nonexistent"

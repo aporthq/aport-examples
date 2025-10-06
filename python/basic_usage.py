@@ -1,5 +1,5 @@
 """
-Basic Python examples for AI Agent Passport Registry
+Basic Python examples for The Passport for AI Agents
 """
 
 import requests
@@ -13,7 +13,7 @@ API_BASE_URL = os.getenv('API_URL', 'https://api.aport.io')
 ADMIN_TOKEN = os.getenv('ADMIN_TOKEN', 'your-admin-token')
 
 class AgentPassportClient:
-    """Client for interacting with the AI Agent Passport Registry API"""
+    """Client for interacting with The Passport for AI Agents API"""
     
     def __init__(self, base_url: str = API_BASE_URL, admin_token: str = ADMIN_TOKEN):
         self.base_url = base_url
@@ -353,14 +353,14 @@ class AgentPassportClient:
 
 def main():
     """Run example usage"""
-    print('🚀 AI Agent Passport Registry - Python Examples\n')
+    print('🚀 The Passport for AI Agents - Python Examples\n')
     
     # Initialize client
     client = AgentPassportClient()
     
     # Verify existing passports
     client.verify_passport('ap_demo_001')
-    client.verify_passport('ap_128094d3')
+    client.verify_passport('ap_a2d10232c6534523812423eec8a1425c')
 
     # Demonstrate capabilities and limits enforcement
     client.demonstrate_capabilities_and_limits('ap_demo_001')
