@@ -85,8 +85,8 @@ app.post("/api/custom-mcp-validation", (req, res) => {
 // Example 3: Policy-specific MCP enforcement
 const refundsRouter = express.Router();
 
-// Apply payments.refund.v1 policy with MCP checks
-refundsRouter.use(createMCPAwarePolicyMiddleware("payments.refund.v1"));
+// Apply finance.payment.refund.v1 policy with MCP checks
+refundsRouter.use(createMCPAwarePolicyMiddleware("finance.payment.refund.v1"));
 
 refundsRouter.post("/create", (req, res) => {
   const { amount, customer_id } = req.body;
@@ -94,7 +94,7 @@ refundsRouter.post("/create", (req, res) => {
   // This endpoint is protected by:
   // 1. Agent passport verification
   // 2. MCP allowlist checks (if headers present)
-  // 3. payments.refund.v1 policy requirements
+  // 3. finance.payment.refund.v1 policy requirements
 
   console.log(`Processing refund: $${amount} for customer ${customer_id}`);
   console.log("MCP Context:", req.mcp);
@@ -121,8 +121,8 @@ app.use("/api/refunds", refundsRouter);
 // Example 4: Data export with MCP enforcement
 const exportRouter = express.Router();
 
-// Apply data.export.v1 policy with MCP checks
-exportRouter.use(createMCPAwarePolicyMiddleware("data.export.v1"));
+// Apply data.export.create.v1 policy with MCP checks
+exportRouter.use(createMCPAwarePolicyMiddleware("data.export.create.v1"));
 
 exportRouter.post("/csv", (req, res) => {
   const { table, filters, include_pii } = req.body;

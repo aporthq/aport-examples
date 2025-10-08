@@ -1,6 +1,6 @@
 # Usage Examples
 
-This directory contains practical examples and tutorials for using the AI Agent Passport Registry.
+This directory contains practical examples and tutorials for using The Passport for AI Agents.
 
 ## 📚 Examples
 
@@ -28,7 +28,7 @@ This directory contains practical examples and tutorials for using the AI Agent 
 
 ### Verify an Agent Passport
 ```bash
-curl "https://api.aport.io/api/verify/ap_128094d3"
+curl "https://api.aport.io/api/verify/ap_a2d10232c6534523812423eec8a1425c"
 ```
 
 ### Create a New Passport

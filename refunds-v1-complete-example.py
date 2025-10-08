@@ -15,7 +15,7 @@ from agent_passport_middleware import require_refunds_policy
 
 app = FastAPI(
     title="Refunds v1 Example Service",
-    description="Complete example demonstrating payments.refund.v1 policy features",
+    description="Complete example demonstrating finance.payment.refund.v1 policy features",
     version="1.0.0"
 )
 
@@ -62,7 +62,7 @@ async def process_refund(
     policy_result = Depends(require_refunds_policy(AGENT_ID, fail_closed=True, log_violations=True))
 ):
     """
-    Process a refund request with payments.refund.v1 policy protection.
+    Process a refund request with finance.payment.refund.v1 policy protection.
     
     The policy is automatically enforced by the middleware dependency.
     If the request passes policy validation, process the refund.
@@ -149,7 +149,7 @@ async def general_exception_handler(request, exc):
 def print_examples():
     """Print example curl commands for testing"""
     print("\n=== Refunds v1 Example Service ===")
-    print("Service running with payments.refund.v1 policy protection")
+    print("Service running with finance.payment.refund.v1 policy protection")
     print("\n=== Test Examples ===\n")
     
     # Example 1: Valid refund

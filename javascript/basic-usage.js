@@ -1,5 +1,5 @@
 /**
- * Basic JavaScript/Node.js examples for AI Agent Passport Registry
+ * Basic JavaScript/Node.js examples for The Passport for AI Agents
  */
 
 const https = require("https");
@@ -261,7 +261,11 @@ async function demonstrateCapabilitiesAndLimits(agentId) {
       console.log("\n🛡️ Enforcement Examples:");
 
       // Refund capability check
-      if (passport.capabilities?.some((cap) => cap.id === "payments.refund")) {
+      if (
+        passport.capabilities?.some(
+          (cap) => cap.id === "finance.payment.refund"
+        )
+      ) {
         console.log("  ✅ Agent has refund capability");
 
         // Check refund limits
@@ -479,11 +483,11 @@ function compareAssuranceLevels(current, required) {
 
 // Example usage
 async function main() {
-  console.log("🚀 AI Agent Passport Registry - JavaScript Examples\n");
+  console.log("🚀 The Passport for AI Agents - JavaScript Examples\n");
 
   // Verify existing passports
   await verifyPassport("ap_demo_001");
-  await verifyPassport("ap_128094d3");
+  await verifyPassport("ap_a2d10232c6534523812423eec8a1425c");
 
   // Demonstrate capabilities and limits enforcement
   await demonstrateCapabilitiesAndLimits("ap_demo_001");
