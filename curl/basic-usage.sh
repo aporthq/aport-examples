@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Basic cURL examples for AI Agent Passport Registry
+# Basic cURL examples for The Passport for AI Agents
 # Make sure to set your API_URL and ADMIN_TOKEN environment variables
 
 API_BASE_URL=${API_URL:-"https://api.aport.io"}
 ADMIN_TOKEN=${ADMIN_TOKEN:-"your-admin-token"}
 
-echo "🚀 AI Agent Passport Registry - cURL Examples"
+echo "🚀 The Passport for AI Agents - cURL Examples"
 echo "=============================================="
 
 # Colors for output
@@ -57,7 +57,7 @@ echo -e "\n${YELLOW}1. Verifying existing passports${NC}"
 echo "================================"
 
 make_request "GET" "/api/verify/ap_demo_001"
-make_request "GET" "/api/verify/ap_128094d3"
+make_request "GET" "/api/verify/ap_a2d10232c6534523812423eec8a1425c"
 
 # 2. Create a new passport
 echo -e "\n${YELLOW}2. Creating a new passport${NC}"

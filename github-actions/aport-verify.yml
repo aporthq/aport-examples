@@ -52,7 +52,7 @@ jobs:
           echo "$BODY" | jq '.'
 
           # Call APort policy verification API
-          RESPONSE=$(curl -fsS -X POST "$APORT_API_BASE/verify/policy/repo.v1" \
+          RESPONSE=$(curl -fsS -X POST "$APORT_API_BASE/verify/policy/code.repository.merge.v1" \
                -H "Content-Type: application/json" \
                -d "$BODY" \
                -w "\n%{http_code}")

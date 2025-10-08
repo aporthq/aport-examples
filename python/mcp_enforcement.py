@@ -119,11 +119,11 @@ async def custom_mcp_validation(request: Request, data: dict = {}):
     }
 
 # Example 3: Policy-specific MCP enforcement for refunds
-refunds_policy_middleware = create_mcp_aware_policy_middleware('payments.refund.v1')
+refunds_policy_middleware = create_mcp_aware_policy_middleware('finance.payment.refund.v1')
 
 @app.middleware("http")
 async def refunds_policy_handler(request: Request, call_next):
-    """Apply payments.refund.v1 policy with MCP checks to refund endpoints."""
+    """Apply finance.payment.refund.v1 policy with MCP checks to refund endpoints."""
     if request.url.path.startswith("/api/refunds/"):
         return await refunds_policy_middleware(request, call_next)
     return await call_next(request)
@@ -136,7 +136,7 @@ async def create_refund(request: Request, refund_data: RefundRequest):
     This endpoint is protected by:
     1. Agent passport verification
     2. MCP allowlist checks (if headers present)
-    3. payments.refund.v1 policy requirements
+    3. finance.payment.refund.v1 policy requirements
     """
     agent = getattr(request.state, 'agent', None)
     mcp_headers = get_mcp_headers(request)
@@ -167,11 +167,11 @@ async def get_refund_status(request: Request, refund_id: str):
     }
 
 # Example 4: Data export with MCP enforcement
-export_policy_middleware = create_mcp_aware_policy_middleware('data.export.v1')
+export_policy_middleware = create_mcp_aware_policy_middleware('data.export.create.v1')
 
 @app.middleware("http")
 async def export_policy_handler(request: Request, call_next):
-    """Apply data.export.v1 policy with MCP checks to export endpoints."""
+    """Apply data.export.create.v1 policy with MCP checks to export endpoints."""
     if request.url.path.startswith("/api/export/"):
         return await export_policy_middleware(request, call_next)
     return await call_next(request)

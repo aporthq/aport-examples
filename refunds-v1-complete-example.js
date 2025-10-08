@@ -114,7 +114,7 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Refunds v1 Example Service running on port ${PORT}`);
-  console.log("Protected by APort payments.refund.v1 policy pack");
+  console.log("Protected by APort finance.payment.refund.v1 policy pack");
   console.log("\n=== Test Examples ===\n");
 
   // Example 1: Valid refund
