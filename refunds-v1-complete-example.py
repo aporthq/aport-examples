@@ -11,7 +11,7 @@ import asyncio
 from datetime import datetime
 import uuid
 
-from agent_passport_middleware import require_refunds_policy
+from aporthq_middleware_fastapi import require_refunds_policy
 
 app = FastAPI(
     title="Refunds v1 Example Service",

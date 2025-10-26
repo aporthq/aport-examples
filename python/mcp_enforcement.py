@@ -12,7 +12,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 # Import Agent Passport middleware components
-from agent_passport_middleware import (
+from aporthq_middleware_fastapi import (
     AgentPassportMiddleware,
     MCPEnforcementMiddleware,
     MCPEnforcementConfig,

@@ -7,7 +7,7 @@ and security measures. No hardcoded currency or region restrictions.
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from agent_passport import process_refund, create_refund_context, RefundContext, RefundPolicyConfig
+from aporthq_sdk_python import process_refund, create_refund_context, RefundContext, RefundPolicyConfig
 import logging
 
 # Configure logging
