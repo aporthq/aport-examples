@@ -21,13 +21,13 @@ The Passport for AI Agents provides a RESTful API for managing AI agent identiti
 Let's start by verifying an existing agent passport:
 
 ```bash
-curl "https://api.aport.io/api/verify/ap_demo_001"
+curl "https://api.aport.io/api/verify/ap_a2d10232c6534523812423eec8a1425c"
 ```
 
 **Expected Response:**
 ```json
 {
-  "agent_id": "ap_demo_001",
+  "agent_id": "ap_a2d10232c6534523812423eec8a1425c",
   "owner": "AI Passport Registry Demo",
   "role": "Tier-1",
   "permissions": ["read:tickets", "create:tickets", "update:tickets"],
@@ -88,13 +88,13 @@ When an agent doesn't exist, you'll get a 404 error:
 For applications that only need basic status information:
 
 ```bash
-curl "https://api.aport.io/api/verify-compact?agent_id=ap_demo_001"
+curl "https://api.aport.io/api/verify-compact?agent_id=ap_a2d10232c6534523812423eec8a1425c"
 ```
 
 **Response:**
 ```json
 {
-  "agent_id": "ap_demo_001",
+  "agent_id": "ap_a2d10232c6534523812423eec8a1425c",
   "status": "active",
   "role": "Tier-1"
 }
@@ -140,7 +140,83 @@ curl -X POST "https://api.aport.io/api/admin/create" \
   }'
 ```
 
-## Step 9: Next Steps
+## Step 9: Policy Verification
+
+Policy verification allows you to check if an agent is authorized to perform specific actions. **Important:** Policy verification automatically verifies the passport, so you don't need to call `/api/verify/{agent_id}` first.
+
+### Basic Policy Verification
+
+```bash
+curl -X POST "https://api.aport.io/api/verify/policy/finance.payment.refund.v1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "context": {
+      "agent_id": "ap_a2d10232c6534523812423eec8a1425c",
+      "policy_id": "finance.payment.refund.v1",
+      "context": {
+        "amount": 5000,
+        "currency": "USD",
+        "customer_id": "cust_123"
+      }
+    }
+  }'
+```
+
+**Response:**
+```json
+{
+  "decision": {
+    "decision_id": "dec_123456789",
+    "allow": true,
+    "reasons": [
+      {
+        "code": "capability_verified",
+        "message": "Agent has required refund capability",
+        "severity": "info"
+      }
+    ],
+    "assurance_level": "L2",
+    "created_at": "2025-01-16T10:30:00Z",
+    "expires_in": 300
+  },
+  "request_id": "policy_123456789_abc123"
+}
+```
+
+### Request Structure
+
+- **Endpoint**: `/api/verify/policy/{pack_id}` (POST)
+- **pack_id**: Policy pack identifier (e.g., `finance.payment.refund.v1`)
+- **Request Body**:
+  ```json
+  {
+    "context": {
+      "agent_id": "ap_...",        // Required: Agent passport ID
+      "policy_id": "...",           // Required: Policy ID (usually same as pack_id)
+      "context": { ... },           // Required: Policy-specific context
+      "idempotency_key": "..."     // Optional: For duplicate request prevention
+    }
+  }
+  ```
+
+### Response Structure
+
+- **decision.allow**: `true` if authorized, `false` if denied
+- **decision.decision_id**: Unique identifier for audit trails
+- **decision.reasons**: Array of reason codes and messages
+- **decision.assurance_level**: Required assurance level
+- **decision.expires_in**: Decision TTL in seconds
+
+### Common Policy Packs
+
+- `finance.payment.refund.v1` - Payment refunds
+- `finance.payment.charge.v1` - Payment charges
+- `data.export.create.v1` - Data exports
+- `code.repository.merge.v1` - Repository merges
+- `code.release.publish.v1` - Code releases
+- `messaging.message.send.v1` - Messaging operations
+
+## Step 10: Next Steps
 
 Now that you understand the basics:
 
@@ -149,6 +225,7 @@ Now that you understand the basics:
 3. **Handle errors**: Learn about [error handling patterns](../error-handling/)
 4. **Implement rate limiting**: See [rate limiting best practices](../rate-limiting/)
 5. **Set up webhooks**: Learn about [webhook integration](../webhooks/)
+6. **Use policy verification**: See [policy verification examples](../curl/) for more examples
 
 ## Common Use Cases
 
