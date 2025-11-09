@@ -302,6 +302,53 @@ class AgentPassportClient:
         except ValueError:
             return False
     
+    def verify_policy(self, pack_id: str, agent_id: str, policy_id: str, context: Dict[str, Any], idempotency_key: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Verify a policy decision.
+        
+        Note: Policy verification automatically verifies the passport - no need to call verify_passport() first.
+        
+        Args:
+            pack_id: Policy pack identifier (e.g., "finance.payment.refund.v1")
+            agent_id: Agent passport ID
+            policy_id: Policy ID (usually same as pack_id)
+            context: Policy-specific context data
+            idempotency_key: Optional idempotency key for duplicate request prevention
+        """
+        print(f'\n🛡️ Verifying policy: {pack_id} for agent: {agent_id}')
+        
+        request_body = {
+            'context': {
+                'agent_id': agent_id,
+                'policy_id': policy_id,
+                'context': context
+            }
+        }
+        
+        if idempotency_key:
+            request_body['context']['idempotency_key'] = idempotency_key
+        
+        response = self._make_request(
+            'POST',
+            f'/api/verify/policy/{pack_id}',
+            json=request_body
+        )
+        
+        if response['status_code'] == 200:
+            decision = response['data'].get('decision', {})
+            print('✅ Policy verification successful:')
+            print(f"   Decision ID: {decision.get('decision_id', 'N/A')}")
+            print(f"   Allowed: {decision.get('allow', False)}")
+            if decision.get('reasons'):
+                print(f"   Reasons: {json.dumps(decision['reasons'], indent=2)}")
+            if decision.get('assurance_level'):
+                print(f"   Assurance Level: {decision.get('assurance_level')}")
+        else:
+            print(f"❌ Policy verification failed ({response['status_code']}):")
+            print(json.dumps(response['data'], indent=2))
+        
+        return response
+    
     def get_metrics(self) -> Dict[str, Any]:
         """Get system metrics"""
         print('\n📊 Getting system metrics...')
@@ -359,11 +406,11 @@ def main():
     client = AgentPassportClient()
     
     # Verify existing passports
-    client.verify_passport('ap_demo_001')
+    client.verify_passport('ap_a2d10232c6534523812423eec8a1425c')
     client.verify_passport('ap_a2d10232c6534523812423eec8a1425c')
 
     # Demonstrate capabilities and limits enforcement
-    client.demonstrate_capabilities_and_limits('ap_demo_001')
+    client.demonstrate_capabilities_and_limits('ap_a2d10232c6534523812423eec8a1425c')
     
     # Create a new passport
     new_passport = {
@@ -442,11 +489,61 @@ def main():
     
     # Example with rate limiting
     print('\n🔄 Testing rate limiting with retry...')
-    result = client.verify_with_retry('ap_demo_001')
+    result = client.verify_with_retry('ap_a2d10232c6534523812423eec8a1425c')
     if result:
         print('✅ Verification with retry successful:', result)
     else:
         print('❌ Verification with retry failed')
+    
+    # Policy verification examples
+    print('\n' + '='*60)
+    print('🛡️ Policy Verification Examples')
+    print('='*60)
+    print('Note: Policy verification automatically verifies the passport')
+    print('      No need to call verify_passport() first\n')
+    
+    # Example 1: Refund policy verification
+    print('Example 1: Refund policy verification')
+    client.verify_policy(
+        pack_id='finance.payment.refund.v1',
+        agent_id='ap_a2d10232c6534523812423eec8a1425c',
+        policy_id='finance.payment.refund.v1',
+        context={
+            'amount': 5000,  # $50.00 in cents
+            'currency': 'USD',
+            'customer_id': 'cust_123',
+            'reason': 'Customer request'
+        }
+    )
+    
+    # Example 2: Data export policy verification
+    print('\nExample 2: Data export policy verification')
+    client.verify_policy(
+        pack_id='data.export.create.v1',
+        agent_id='ap_a2d10232c6534523812423eec8a1425c',
+        policy_id='data.export.create.v1',
+        context={
+            'table_name': 'users',
+            'row_limit': 1000,
+            'include_pii': False
+        }
+    )
+    
+    # Example 3: Repository merge policy verification
+    print('\nExample 3: Repository merge policy verification')
+    client.verify_policy(
+        pack_id='code.repository.merge.v1',
+        agent_id='ap_a2d10232c6534523812423eec8a1425c',
+        policy_id='code.repository.merge.v1',
+        context={
+            'repo': 'company/my-repo',
+            'base_branch': 'main',
+            'files_changed': 5,
+            'lines_added': 100,
+            'labels': ['approved', 'tested'],
+            'reviews': 2
+        }
+    )
     
     print('\n✨ Examples completed!')
 

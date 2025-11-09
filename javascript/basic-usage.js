@@ -157,6 +157,64 @@ async function updateAgentStatus(agentId, status, reason = "") {
 }
 
 /**
+ * Verify a policy decision
+ *
+ * Note: Policy verification automatically verifies the passport - no need to call verifyPassport() first
+ */
+async function verifyPolicy(
+  packId,
+  agentId,
+  policyId,
+  context,
+  idempotencyKey = null
+) {
+  console.log(`\n🛡️ Verifying policy: ${packId} for agent: ${agentId}`);
+
+  try {
+    const requestBody = {
+      context: {
+        agent_id: agentId,
+        policy_id: policyId,
+        context: context,
+      },
+    };
+
+    if (idempotencyKey) {
+      requestBody.context.idempotency_key = idempotencyKey;
+    }
+
+    const response = await makeRequest(
+      `${API_BASE_URL}/api/verify/policy/${packId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    if (response.status === 200) {
+      const decision = response.data.decision || {};
+      console.log("✅ Policy verification successful:");
+      console.log(`   Decision ID: ${decision.decision_id || "N/A"}`);
+      console.log(`   Allowed: ${decision.allow || false}`);
+      if (decision.reasons) {
+        console.log(`   Reasons:`, JSON.stringify(decision.reasons, null, 2));
+      }
+      if (decision.assurance_level) {
+        console.log(`   Assurance Level: ${decision.assurance_level}`);
+      }
+    } else {
+      console.log(`❌ Policy verification failed (${response.status}):`);
+      console.log(JSON.stringify(response.data, null, 2));
+    }
+  } catch (error) {
+    console.error("❌ Error verifying policy:", error.message);
+  }
+}
+
+/**
  * Get system metrics
  */
 async function getMetrics() {
@@ -486,11 +544,11 @@ async function main() {
   console.log("🚀 The Passport for AI Agents - JavaScript Examples\n");
 
   // Verify existing passports
-  await verifyPassport("ap_demo_001");
+  await verifyPassport("ap_a2d10232c6534523812423eec8a1425c");
   await verifyPassport("ap_a2d10232c6534523812423eec8a1425c");
 
   // Demonstrate capabilities and limits enforcement
-  await demonstrateCapabilitiesAndLimits("ap_demo_001");
+  await demonstrateCapabilitiesAndLimits("ap_a2d10232c6534523812423eec8a1425c");
 
   // Create a new passport
   const newPassport = {
@@ -570,11 +628,61 @@ async function main() {
   // Example with rate limiting
   console.log("\n🔄 Testing rate limiting with retry...");
   try {
-    const result = await verifyWithRetry("ap_demo_001");
+    const result = await verifyWithRetry("ap_a2d10232c6534523812423eec8a1425c");
     console.log("✅ Verification with retry successful:", result);
   } catch (error) {
     console.log("❌ Verification with retry failed:", error.message);
   }
+
+  // Policy verification examples
+  console.log("\n" + "=".repeat(60));
+  console.log("🛡️ Policy Verification Examples");
+  console.log("=".repeat(60));
+  console.log("Note: Policy verification automatically verifies the passport");
+  console.log("      No need to call verifyPassport() first\n");
+
+  // Example 1: Refund policy verification
+  console.log("Example 1: Refund policy verification");
+  await verifyPolicy(
+    "finance.payment.refund.v1",
+    "ap_a2d10232c6534523812423eec8a1425c",
+    "finance.payment.refund.v1",
+    {
+      amount: 5000, // $50.00 in cents
+      currency: "USD",
+      customer_id: "cust_123",
+      reason: "Customer request",
+    }
+  );
+
+  // Example 2: Data export policy verification
+  console.log("\nExample 2: Data export policy verification");
+  await verifyPolicy(
+    "data.export.create.v1",
+    "ap_a2d10232c6534523812423eec8a1425c",
+    "data.export.create.v1",
+    {
+      table_name: "users",
+      row_limit: 1000,
+      include_pii: false,
+    }
+  );
+
+  // Example 3: Repository merge policy verification
+  console.log("\nExample 3: Repository merge policy verification");
+  await verifyPolicy(
+    "code.repository.merge.v1",
+    "ap_a2d10232c6534523812423eec8a1425c",
+    "code.repository.merge.v1",
+    {
+      repo: "company/my-repo",
+      base_branch: "main",
+      files_changed: 5,
+      lines_added: 100,
+      labels: ["approved", "tested"],
+      reviews: 2,
+    }
+  );
 
   console.log("\n✨ Examples completed!");
 }
@@ -591,4 +699,5 @@ module.exports = {
   updateAgentStatus,
   getMetrics,
   verifyWithRetry,
+  verifyPolicy,
 };

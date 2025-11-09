@@ -35,8 +35,10 @@ jobs:
           APORT_AGENT_ID: ${{ secrets.APORT_AGENT_ID }} # who is acting
         run: |
           # Build context object for APort policy verification
+          # Note: The API automatically verifies the passport, so we only need to provide agent_id and policy context
           BODY=$(jq -n \
             --arg id "$APORT_AGENT_ID" \
+            --arg policy_id "code.repository.merge.v1" \
             --arg repo "${{ github.repository }}" \
             --arg branch "${{ github.ref_name }}" \
             --arg actor "${{ github.actor }}" \
@@ -46,13 +48,15 @@ jobs:
             --argjson labels "${{ steps.labels.outputs.labels || '[]' }}" \
             --argjson reviews 0 \
             --argjson pr_size_kb $(( (${{ steps.diff.outputs.lines }} * 50) / 1024 )) \
-            '{agent_id:$id, context:{repo:$repo, base_branch:$branch, github_actor:$actor, github_app:$app, files_changed:$files, lines_added:$lines, labels:$labels, reviews:$reviews, pr_size_kb:$pr_size_kb}}')
+            '{context:{agent_id:$id, policy_id:$policy_id, context:{repo:$repo, base_branch:$branch, github_actor:$actor, github_app:$app, files_changed:$files, lines_added:$lines, labels:$labels, reviews:$reviews, pr_size_kb:$pr_size_kb}}}')
 
           echo "Policy verification request:"
           echo "$BODY" | jq '.'
 
           # Call APort policy verification API
-          RESPONSE=$(curl -fsS -X POST "$APORT_API_BASE/verify/policy/code.repository.merge.v1" \
+          # Endpoint: /api/verify/policy/{pack_id} (POST)
+          # Note: Passport verification is automatic - no need to call /api/verify/{agent_id} first
+          RESPONSE=$(curl -fsS -X POST "$APORT_API_BASE/api/verify/policy/code.repository.merge.v1" \
                -H "Content-Type: application/json" \
                -d "$BODY" \
                -w "\n%{http_code}")
@@ -66,17 +70,19 @@ jobs:
           # Check if policy verification passed
           if [ "$HTTP_CODE" != "200" ]; then
             echo "❌ APort policy verification failed (HTTP $HTTP_CODE)"
-            echo "$BODY_RESPONSE" | jq -r '.violations[]?' || echo "Unknown error"
+            echo "$BODY_RESPONSE" | jq -r '.error // .message // "Unknown error"' || echo "Unknown error"
             exit 1
           fi
 
           # Parse response to check if allowed
-          ALLOWED=$(echo "$BODY_RESPONSE" | jq -r '.allow // false')
+          # Response structure: { decision: { allow: boolean, reasons: [...], decision_id: "..." }, ... }
+          ALLOWED=$(echo "$BODY_RESPONSE" | jq -r '.decision.allow // false')
           if [ "$ALLOWED" != "true" ]; then
             echo "❌ APort policy verification denied"
-            echo "$BODY_RESPONSE" | jq -r '.violations[]?' || echo "Policy violation"
+            echo "$BODY_RESPONSE" | jq -r '.decision.reasons[]?.message // .decision.reasons[]?.code // "Policy violation"' || echo "Policy violation"
             exit 1
           fi
 
           echo "✅ APort policy verification passed"
-          echo "$BODY_RESPONSE" | jq -r '.reason // "Policy compliance verified"'
+          DECISION_ID=$(echo "$BODY_RESPONSE" | jq -r '.decision.decision_id // "N/A"')
+          echo "Decision ID: $DECISION_ID"
