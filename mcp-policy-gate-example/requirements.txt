@@ -1,0 +1,15 @@
+# APort SDK (published to PyPI)
+aporthq-sdk-python>=0.1.1
+
+# MCP SDK (optional, for direct MCP integration)
+# mcp>=0.1.0
+
+# OpenAI SDK (for OpenAI integration example)
+openai>=1.0.0
+
+# Anthropic SDK (for Anthropic integration example)
+anthropic>=0.18.0
+
+# Async support
+aiohttp>=3.9.0
+
