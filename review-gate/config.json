@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "mode": "observe",
+  "reviewers": [{"id": 123456, "login": "review-connector[bot]"}],
+  "streams": ["code"],
+  "workflow": "checks.yml",
+  "jobs": ["Verify merge identity", "Unit tests"],
+  "context": "Quality / validated"
+}
