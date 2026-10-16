@@ -1,0 +1,42 @@
+# Copy the verify job from pr-validation.yml and the controller/relay templates.
+# This minimal adapter demonstrates a trunk-default, release-base repository.
+name: PR Merge Validation
+run-name: ${{ inputs.identity }}
+on:
+  workflow_dispatch:
+    inputs:
+      identity:
+        required: true
+        description: Controller-issued identity
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  verify:
+    permissions:
+      contents: read
+      pull-requests: read
+      actions: read
+      statuses: read
+    name: Verify merge identity
+    runs-on: ubuntu-latest
+    outputs:
+      merge: ${{ steps.verify.outputs.merge }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: verify
+        run: node scripts/ci/verify-merge.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+  unit:
+    name: Unit tests
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.verify.outputs.merge }}
+          persist-credentials: false
+      - run: npm ci && npm test
